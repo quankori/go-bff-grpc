@@ -1,0 +1,71 @@
+# Binaries
+/tmp
+*.exe
+*.dll
+*.so
+*.dylib
+main
+
+# Go build artifacts
+*.out
+*.test
+*.o
+
+# Go modules
+/go/pkg
+/go/bin
+go.sum
+
+# Air (live reload tool)
+.air.toml
+tmp/
+
+# Docker files
+docker-compose.override.yml
+docker-compose.local.yml
+docker-compose.dev.yml
+*.env
+
+# VSCode settings
+.vscode/
+.code-workspace
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Redis data (if mounted locally)
+redis_data/
+
+# Kafka data (if mounted locally)
+kafka_data/
+
+# macOS specific
+.DS_Store
+
+# Node modules (if any frontend or UI-related packages are used)
+node_modules/
+
+# Ignore any generated files
+gen/
+generated/
+
+# GraphQL generated files
+.graphqlconfig
+schema.graphqls
+*.graphql
+
+# Ignore .idea folder (JetBrains IDEs like GoLand)
+.idea/
+
+# Ignore coverage files
+coverage.out
+cover.out
+cover/
+*.cov
+
+# Miscellaneous
+*.swp
+*.swo
+*~

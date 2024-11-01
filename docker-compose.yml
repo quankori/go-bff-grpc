@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  go_server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: go_server_container
+    volumes:
+      - ./server:/app
+      - ./server/tmp:/app/tmp
+    ports:
+      - "8100:8100" # gRPC server
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=cinema_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - cinema_network
+
+  go_graphql:
+    build:
+      context: ./graphql
+      dockerfile: Dockerfile
+    container_name: go_graphql_container
+    volumes:
+      - ./graphql:/app
+      - ./graphql/tmp:/app/tmp
+    ports:
+      - "8200:8200" # GraphQL server
+    depends_on:
+      - go_server
+    environment:
+      - GRPC_SERVER_HOST=go_server
+      - GRPC_SERVER_PORT=8100
+    networks:
+      - cinema_network
+
+  redis:
+    image: "redis:alpine"
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cinema_network
+
+  postgres:
+    image: "postgres:14-alpine"
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: cinema_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cinema_network
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  cinema_network:
+    driver: bridge

@@ -1,0 +1,42 @@
+syntax = "proto3";
+package cinema;
+option go_package = "./cinema;cinema";
+
+import "google/protobuf/empty.proto";
+
+service CinemaService {
+    rpc QueryAvailableSeats(QueryAvailableSeatsRequest) returns (QueryAvailableSeatsResponse);
+    rpc ReserveSeat(ReserveSeatRequest) returns (ReserveSeatResponse);
+    rpc CancelSeat(CancelSeatRequest) returns (google.protobuf.Empty);
+}
+
+message QueryAvailableSeatsRequest {
+    int32 rows = 1;    
+    int32 columns = 2; 
+    int32 min_distance = 3; 
+}
+
+message QueryAvailableSeatsResponse {
+    repeated Seat seats = 1;  
+}
+
+message ReserveSeatRequest {
+    int32 row = 1;
+    int32 column = 2;
+}
+
+message ReserveSeatResponse {
+    bool success = 1;         
+    string message = 2;       
+}
+
+message CancelSeatRequest {
+    int32 row = 1;
+    int32 column = 2;
+}
+
+message Seat {
+    int32 row = 1;
+    int32 column = 2;
+    bool is_reserved = 3;
+}

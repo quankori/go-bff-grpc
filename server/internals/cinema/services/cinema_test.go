@@ -7,7 +7,7 @@ import (
 )
 
 func TestCinemaReservation(t *testing.T) {
-	cin := NewCinema(5, 5, 2)
+	cin := NewUserService(5, 5, 2)
 
 	// Test reservation on an empty seat
 	if err := cin.ReserveSeat(1, 1); err != nil {
@@ -31,7 +31,7 @@ func TestCinemaReservation(t *testing.T) {
 }
 
 func TestCinemaCancellation(t *testing.T) {
-	cin := NewCinema(5, 5, 2)
+	cin := NewUserService(5, 5, 2)
 
 	// Reserve and then cancel
 	_ = cin.ReserveSeat(1, 1)
@@ -46,13 +46,13 @@ func TestCinemaCancellation(t *testing.T) {
 }
 
 func TestAvailableSeats(t *testing.T) {
-	cin := NewCinema(5, 5, 2)
+	cin := NewUserService(5, 5, 2)
 	_ = cin.ReserveSeat(1, 1)
 
 	availableSeats := cin.QueryAvailableSeats()
 	for _, seat := range availableSeats {
-		row, col := seat[0], seat[1]
-		if (row == 1 && col == 1) || utils.ManhattanDistance(row, col, 1, 1) < cin.MinDistance {
+		row, col := seat.Row, seat.Column
+		if (row == 1 && col == 1) || utils.ManhattanDistance(int(row), int(col), 1, 1) < cin.(*cinemaService).MinDistance {
 			t.Errorf("expected seat to be unavailable, found available at (%d, %d)", row, col)
 		}
 	}

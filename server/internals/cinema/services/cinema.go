@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/quankori/go-manhattan-distance/server/internals/cinema/proto"
 	"github.com/quankori/go-manhattan-distance/server/pkg/utils"
 )
 
@@ -13,7 +14,15 @@ type Seat struct {
 	IsReserved bool
 }
 
-type Cinema struct {
+type CinemaService interface {
+	QueryAvailableSeats() []*proto.Seat
+	ReserveSeat(row, column int) error
+	CancelSeat(row, column int) error
+	isSeatAvailable(row, column int) bool
+	isDistanced(row, column int) bool
+}
+
+type cinemaService struct {
 	Rows        int
 	Columns     int
 	MinDistance int
@@ -21,8 +30,7 @@ type Cinema struct {
 	mu          sync.Mutex
 }
 
-// NewCinema initializes a new cinema with the given dimensions and minimum distance
-func NewCinema(rows, columns, minDistance int) *Cinema {
+func NewUserService(rows, columns, minDistance int) CinemaService {
 	seats := make([][]*Seat, rows)
 	for i := range seats {
 		seats[i] = make([]*Seat, columns)
@@ -30,7 +38,7 @@ func NewCinema(rows, columns, minDistance int) *Cinema {
 			seats[i][j] = &Seat{Row: i, Column: j, IsReserved: false}
 		}
 	}
-	return &Cinema{
+	return &cinemaService{
 		Rows:        rows,
 		Columns:     columns,
 		MinDistance: minDistance,
@@ -38,8 +46,8 @@ func NewCinema(rows, columns, minDistance int) *Cinema {
 	}
 }
 
-// ReserveSeat reserves a seat if it meets the minimum distancing rule
-func (c *Cinema) ReserveSeat(row, column int) error {
+// ReserveSeat implements CinemaService.
+func (c *cinemaService) ReserveSeat(row int, column int) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -57,7 +65,7 @@ func (c *Cinema) ReserveSeat(row, column int) error {
 }
 
 // CancelSeat cancels a reservation for a given seat
-func (c *Cinema) CancelSeat(row, column int) error {
+func (c *cinemaService) CancelSeat(row, column int) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -73,15 +81,15 @@ func (c *Cinema) CancelSeat(row, column int) error {
 }
 
 // QueryAvailableSeats returns a list of available seats that can be reserved together
-func (c *Cinema) QueryAvailableSeats() [][]int {
+func (c *cinemaService) QueryAvailableSeats() []*proto.Seat {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	var availableSeats [][]int
+	var availableSeats []*proto.Seat
 	for i := 0; i < c.Rows; i++ {
 		for j := 0; j < c.Columns; j++ {
 			if !c.Seats[i][j].IsReserved && c.isDistanced(i, j) {
-				availableSeats = append(availableSeats, []int{i, j})
+				availableSeats = append(availableSeats, &proto.Seat{Row: int32(i), Column: int32(j), IsReserved: false})
 			}
 		}
 	}
@@ -89,7 +97,7 @@ func (c *Cinema) QueryAvailableSeats() [][]int {
 }
 
 // isSeatAvailable checks if a seat is within bounds and not reserved
-func (c *Cinema) isSeatAvailable(row, column int) bool {
+func (c *cinemaService) isSeatAvailable(row, column int) bool {
 	if row < 0 || row >= c.Rows || column < 0 || column >= c.Columns {
 		return false
 	}
@@ -97,7 +105,7 @@ func (c *Cinema) isSeatAvailable(row, column int) bool {
 }
 
 // isDistanced verifies if the minimum distance is respected for a seat
-func (c *Cinema) isDistanced(row, column int) bool {
+func (c *cinemaService) isDistanced(row, column int) bool {
 	for i := 0; i < c.Rows; i++ {
 		for j := 0; j < c.Columns; j++ {
 			if c.Seats[i][j].IsReserved && utils.ManhattanDistance(row, column, i, j) < c.MinDistance {

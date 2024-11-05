@@ -28,3 +28,6 @@ The system is built with three main components:
 - **Kafka Broker** (default setup with Docker Compose)
 
 ## Usage
+
+- Go build
+

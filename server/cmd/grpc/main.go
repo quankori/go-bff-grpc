@@ -4,18 +4,14 @@ import (
 	"log"
 	"net"
 
-	"github.com/quankori/go-manhattan-distance/server/internals/services"
-	"github.com/quankori/go-manhattan-distance/server/pkg/cinema"
+	"github.com/quankori/go-manhattan-distance/server/internals"
+	"github.com/quankori/go-manhattan-distance/server/internals/cinema"
+	"github.com/quankori/go-manhattan-distance/server/internals/cinema/proto"
 	"google.golang.org/grpc"
 )
 
-type server struct {
-	cinema.CinemaServiceServer
-	svc *services.Cinema
-}
-
 func StartGrpc() {
-	svc := services.NewCinema(5, 5, 2)
+	container := internals.GetContainer()
 
 	lis, err := net.Listen("tcp", ":8100")
 	if err != nil {
@@ -23,7 +19,8 @@ func StartGrpc() {
 	}
 
 	grpcServer := grpc.NewServer()
-	cinema.RegisterCinemaServiceServer(grpcServer, &server{svc: svc})
+	cinemaServer := cinema.NewCinemaServer(container.CinemaService)
+	proto.RegisterCinemaServiceServer(grpcServer, cinemaServer)
 
 	log.Println("gRPC server listening on port 8100")
 	if err := grpcServer.Serve(lis); err != nil {

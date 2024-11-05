@@ -4,7 +4,7 @@
 // 	protoc        v5.28.3
 // source: proto/v1/cinema.proto
 
-package cinema
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

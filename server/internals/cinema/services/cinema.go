@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/quankori/go-manhattan-distance/server/internals/cinema/proto"
+	"github.com/quankori/go-manhattan-distance/server/pkg/logger"
 	"github.com/quankori/go-manhattan-distance/server/pkg/utils"
 )
 
@@ -38,6 +39,9 @@ func NewUserService(rows, columns, minDistance int) CinemaService {
 			seats[i][j] = &Seat{Row: i, Column: j, IsReserved: false}
 		}
 	}
+
+	log := logger.NewLogger()
+	defer log.Sync() // Ensures all logs are flushed before exit
 	return &cinemaService{
 		Rows:        rows,
 		Columns:     columns,
@@ -59,7 +63,6 @@ func (c *cinemaService) ReserveSeat(row int, column int) error {
 	if !c.isDistanced(row, column) {
 		return errors.New("seat does not meet minimum distance requirements")
 	}
-
 	c.Seats[row][column].IsReserved = true
 	return nil
 }

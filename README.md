@@ -1,4 +1,4 @@
-# Manhattan Distance
+# Golang Backend-For-Frontend with gRPC
 
 This project implements a cinema seating management system with **gRPC**, **GraphQL**, and **Kafka**. The system manages seat configurations, reservations, cancellations, and seat availability queries while enforcing manthattan distance rules.
 
